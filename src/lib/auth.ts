@@ -27,7 +27,7 @@ const ACCOUNTS: Record<string, { password: string; session: UserSession }> = {
     password: process.env.OPERATOR_PASSWORD || 'operator2026',
     session: {
       id: '22222222-2222-2222-2222-222222222222',
-      name: 'Operator Produksi & Gudang',
+      name: 'Staff Operasional & Gudang',
       username: 'operator',
       role: 'operator',
     },
@@ -53,7 +53,7 @@ export async function createSessionCookie(session: UserSession) {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 hari
+    maxAge: 60 * 60 * 24 * 7,
   });
 }
 
