@@ -449,23 +449,27 @@ export default function OwnerDashboard({
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <form action={tambahProduksiBatch} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3 text-xs">
-            <h3 className="font-bold text-base text-blue-900 border-b pb-2">Input Produksi Multi-Ukuran</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <input type="date" name="event_date" defaultValue={today} required className="border rounded p-2" />
-              <input type="text" name="notes" placeholder="Catatan produksi" className="border rounded p-2" />
-            </div>
-            {(['5kg', '10kg', '20kg'] as const).map((sz) => (
-              <div key={sz} className="grid grid-cols-4 gap-2 items-center bg-slate-50 p-2 rounded border">
-                <span className="font-bold">{sz}</span>
-                <input type="number" name={`gross_${sz}`} min="0" defaultValue="0" placeholder="Bruto" className="border bg-white rounded p-1.5" />
-                <input type="number" name={`damaged_ice_${sz}`} min="0" defaultValue="0" placeholder="Es Rusak" className="border bg-white rounded p-1.5" />
-                <input type="number" name={`damaged_plastic_${sz}`} min="0" defaultValue="0" placeholder="Plastik Rusak" className="border bg-white rounded p-1.5" />
+              <h3 className="font-bold text-base text-blue-900 border-b pb-2">Input Produksi Multi-Ukuran</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <input type="date" name="event_date" defaultValue={today} required className="border rounded p-2" />
+                <input type="text" name="notes" placeholder="Catatan produksi" className="border rounded p-2" />
               </div>
-            ))}
-            <button type="submit" className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg">
-              Simpan Produksi
-            </button>
-          </form>
+              <div className="grid grid-cols-3 gap-2 px-2 text-[11px] font-semibold text-slate-500">
+                <span>Ukuran</span>
+                <span>Produksi (Bks)</span>
+                <span>Plastik Rusak (Lbr)</span>
+              </div>
+              {(['5kg', '10kg', '20kg'] as const).map((sz) => (
+                <div key={sz} className="grid grid-cols-3 gap-2 items-center bg-slate-50 p-2 rounded border">
+                  <span className="font-bold">{sz}</span>
+                  <input type="number" name={`gross_${sz}`} min="0" defaultValue="0" placeholder="Produksi (Bks)" className="border bg-white rounded p-1.5" />
+                  <input type="number" name={`damaged_plastic_${sz}`} min="0" defaultValue="0" placeholder="Plastik Rusak (Lbr)" className="border bg-white rounded p-1.5" />
+                </div>
+              ))}
+              <button type="submit" className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg">
+                Simpan Produksi
+              </button>
+            </form>
 
           <form action={simpanSerahKasOwner} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3 text-xs">
             <h3 className="font-bold text-base text-teal-900 border-b pb-2">Serah Terima Kas ke Owner</h3>

@@ -106,7 +106,6 @@ export default function StaffDashboard({
 }) {
   const [expCategory, setExpCategory] = useState('bbm');
   const [prodGross, setProdGross] = useState<Record<string, number>>({ '5kg': 0, '10kg': 0, '20kg': 0 });
-  const [prodDamaged, setProdDamaged] = useState<Record<string, number>>({ '5kg': 0, '10kg': 0, '20kg': 0 });
 
   const isReceiptRequired = MANDATORY_CATS.has(expCategory);
 
@@ -185,7 +184,7 @@ export default function StaffDashboard({
                     <th className="p-2.5">Awal</th>
                     <th className="p-2.5">Masuk</th>
                     <th className="p-2.5">Terpakai</th>
-                    <th className="p-2.5">Rusak</th>
+                    <th className="p-2.5">Plastik Rusak</th>
                     <th className="p-2.5 font-bold text-indigo-900">Sisa Stok</th>
                   </tr>
                 </thead>
@@ -211,7 +210,7 @@ export default function StaffDashboard({
             <div>
               <h3 className="font-bold text-base text-blue-900">1. Input Produksi Harian (Multi-Ukuran Sekaligus)</h3>
               <p className="text-xs text-slate-500">
-                Produksi Layak Jual = Produksi Bruto - Produk Jadi Rusak. Es rusak tidak dikurangi dua kali dari stok.
+                Catat jumlah kemasan produksi per ukuran dan jumlah plastik rusak (jika ada) pada proses produksi.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -226,14 +225,13 @@ export default function StaffDashboard({
                 <tr>
                   <th className="p-2.5">Ukuran</th>
                   <th className="p-2.5">Produksi Bruto (Bks)</th>
-                  <th className="p-2.5">Produk Jadi Rusak (Bks)</th>
                   <th className="p-2.5">Produksi Layak Jual (Otomatis)</th>
-                  <th className="p-2.5">Plastik Kosong Rusak (Lbr)</th>
+                  <th className="p-2.5">Plastik Rusak (Lbr)</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {(['5kg', '10kg', '20kg'] as const).map((sz) => {
-                  const layak = Math.max(0, (prodGross[sz] || 0) - (prodDamaged[sz] || 0));
+                  const layak = Math.max(0, prodGross[sz] || 0);
                   return (
                     <tr key={sz}>
                       <td className="p-2.5 font-bold text-sm">{sz}</td>
@@ -244,16 +242,6 @@ export default function StaffDashboard({
                           min="0"
                           defaultValue="0"
                           onChange={(e) => setProdGross({ ...prodGross, [sz]: Number(e.target.value || 0) })}
-                          className="w-28 border rounded-lg p-2 text-sm"
-                        />
-                      </td>
-                      <td className="p-2.5">
-                        <input
-                          type="number"
-                          name={`damaged_ice_${sz}`}
-                          min="0"
-                          defaultValue="0"
-                          onChange={(e) => setProdDamaged({ ...prodDamaged, [sz]: Number(e.target.value || 0) })}
                           className="w-28 border rounded-lg p-2 text-sm"
                         />
                       </td>
@@ -512,8 +500,8 @@ export default function StaffDashboard({
                 <ul className="space-y-1">
                   {data.todayProductions.map((p) => (
                     <li key={p.id} className={`border-b pb-1 ${p.is_voided ? 'line-through opacity-50' : ''}`}>
-                      <strong>{p.size}</strong>: Bruto {p.gross_qty} | Rusak {p.damaged_product_qty} | Layak{' '}
-                      <strong>{p.good_qty} bks</strong> | Plastik Rusak {p.damaged_plastic_qty}
+                      <strong>{p.size}</strong>: Bruto {p.gross_qty} | Layak{' '}
+                      <strong>{p.good_qty} bks</strong> | Plastik Rusak {p.damaged_plastic_qty} lbr
                     </li>
                   ))}
                 </ul>

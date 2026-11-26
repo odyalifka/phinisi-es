@@ -86,18 +86,15 @@ export async function tambahProduksiBatch(formData: FormData) {
 
   for (const size of SIZES) {
     const gross_qty = Number(formData.get(`gross_${size}`) || 0);
-    const damaged_product_qty = Number(formData.get(`damaged_ice_${size}`) || 0);
+    const damaged_product_qty = 0;
     const damaged_plastic_qty = Number(formData.get(`damaged_plastic_${size}`) || 0);
 
-    if (gross_qty < 0 || damaged_product_qty < 0 || damaged_plastic_qty < 0) {
+    if (gross_qty < 0 || damaged_plastic_qty < 0) {
       redirectWith('error', `Angka produksi ukuran ${size} tidak boleh negatif.`);
-    }
-    if (damaged_product_qty > gross_qty) {
-      redirectWith('error', `Produk jadi rusak (${size}) tidak boleh melebihi produksi bruto (${gross_qty} bks).`);
     }
 
     if (gross_qty > 0 || damaged_plastic_qty > 0) {
-      const good_qty = gross_qty - damaged_product_qty;
+      const good_qty = gross_qty;
       const plastic_unit_cost = wacMap.get(size) || 0;
       const plastic_total_cost = (gross_qty + damaged_plastic_qty) * plastic_unit_cost;
       entries.push({
@@ -113,7 +110,7 @@ export async function tambahProduksiBatch(formData: FormData) {
   }
 
   if (entries.length === 0) {
-    redirectWith('error', 'Isi minimal satu ukuran kemasan (Produksi Bruto atau Plastik Rusak > 0).');
+    redirectWith('error', 'Isi minimal satu ukuran kemasan (Produksi atau Plastik Rusak > 0).');
   }
 
   for (const item of entries) {
@@ -151,8 +148,7 @@ export async function tambahProduksiBatch(formData: FormData) {
 
   redirectWith('success', `Produksi (${entries.length} ukuran) pada ${event_date} berhasil disimpan.`);
 }
-
-export async function voidProduksi(formData: FormData) {
+$1(formData: FormData) {
   const session = await getSession();
   if (!session || session.role !== 'owner') {
     redirectWith('error', 'Hanya Owner yang berhak membatalkan (Void) data produksi.');
