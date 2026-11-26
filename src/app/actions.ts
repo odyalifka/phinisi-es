@@ -902,3 +902,76 @@ export async function simpanSerahKasOwner(formData: FormData) {
 
   redirectWith('success', 'Serah terima kas ke Owner berhasil dicatat.');
 }
+export async function tambahDriver(formData: FormData) {
+  const session = await getSession();
+  if (!session || session.role !== 'owner') {
+    redirectWith('error', 'Hanya Owner yang dapat menambah data driver.');
+  }
+  const name = String(formData.get('driver_name') || '').trim();
+  if (!name) redirectWith('error', 'Nama driver baru wajib diisi.');
+
+  const existing = await pool.query(`SELECT id FROM drivers WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))`, [name]);
+  if (existing.rows.length > 0) {
+    await pool.query(`UPDATE drivers SET name = $1, is_active = TRUE WHERE id = $2`, [name, existing.rows[0].id]);
+    redirectWith('success', `Driver "${name}" diaktifkan kembali.`);
+  }
+
+  const ins = await pool.query(`INSERT INTO drivers (name, is_active) VALUES ($1, TRUE) RETURNING id`, [name]);
+  await writeAuditLog({
+    tableName: 'drivers',
+    recordId: ins.rows[0].id,
+    actionType: 'INSERT',
+    oldValues: null,
+    newValues: { name, is_active: true },
+    session,
+    reason: 'Menambah driver baru',
+  });
+  redirectWith('success', `Driver "${name}" berhasil ditambahkan.`);
+}
+
+export async function ubahDriver(formData: FormData) {
+  const session = await getSession();
+  if (!session || session.role !== 'owner') {
+    redirectWith('error', 'Hanya Owner yang dapat mengubah nama driver.');
+  }
+  const driver_id = String(formData.get('driver_id') || '');
+  const new_name = String(formData.get('new_name') || '').trim();
+  if (!driver_id || !new_name) redirectWith('error', 'Nama baru driver tidak boleh kosong.');
+
+  const oldRes = await pool.query(`SELECT name FROM drivers WHERE id = $1`, [driver_id]);
+  const oldName = oldRes.rows[0]?.name || '';
+
+  await pool.query(`UPDATE drivers SET name = $1 WHERE id = $2`, [new_name, driver_id]);
+  await writeAuditLog({
+    tableName: 'drivers',
+    recordId: driver_id,
+    actionType: 'UPDATE',
+    oldValues: { name: oldName },
+    newValues: { name: new_name },
+    session,
+    reason: 'Edit nama driver',
+  });
+  redirectWith('success', `Nama driver berhasil diubah menjadi "${new_name}".`);
+}
+
+export async function hapusDriver(formData: FormData) {
+  const session = await getSession();
+  if (!session || session.role !== 'owner') {
+    redirectWith('error', 'Hanya Owner yang dapat menghapus/menonaktifkan driver.');
+  }
+  const driver_id = String(formData.get('driver_id') || '');
+  const oldRes = await pool.query(`SELECT name FROM drivers WHERE id = $1`, [driver_id]);
+  const oldName = oldRes.rows[0]?.name || '';
+
+  await pool.query(`DELETE FROM drivers WHERE id = $1`, [driver_id]);
+  await writeAuditLog({
+    tableName: 'drivers',
+    recordId: driver_id,
+    actionType: 'VOID',
+    oldValues: { name: oldName },
+    newValues: null,
+    session,
+    reason: 'Menghapus driver yang keluar',
+  });
+  redirectWith('success', `Driver "${oldName}" telah dihapus dari daftar pilihan.`);
+}
