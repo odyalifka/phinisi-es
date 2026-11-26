@@ -2,6 +2,9 @@
 
 import {
   bayarBonusDriver,
+  tambahDriver,
+  ubahDriver,
+  hapusDriver,
   bayarPiutangBertahap,
   beliPlastik,
   logoutAction,
@@ -493,6 +496,40 @@ export default function OwnerDashboard({
           </form>
         </section>
 
+                <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 text-xs">
+          <div className="border-b pb-2">
+            <h2 className="text-base font-bold text-slate-900">Manajemen Karyawan Driver (Dropdown Pengantaran)</h2>
+            <p className="text-slate-500">Tambah driver baru, ubah nama driver, atau hapus driver yang sudah keluar. Riwayat pengantaran lama tetap aman tersimpan.</p>
+          </div>
+
+          <form action={tambahDriver} className="flex flex-col sm:flex-row gap-2 max-w-md">
+            <input type="text" name="driver_name" required placeholder="Nama driver baru..." className="flex-1 border rounded-lg px-3 py-2" />
+            <button type="submit" className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded-lg">
+              + Tambah Driver
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {data.drivers.map((drv: { id: string; name: string }) => (
+              <div key={drv.id} className="border rounded-lg p-3 bg-slate-50 flex items-center justify-between gap-2">
+                <form action={ubahDriver} className="flex items-center gap-1.5 flex-1">
+                  <input type="hidden" name="driver_id" value={drv.id} />
+                  <input type="text" name="new_name" defaultValue={drv.name} required className="w-full border bg-white rounded px-2 py-1 text-xs font-semibold" />
+                  <button type="submit" className="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded font-semibold">
+                    Simpan
+                  </button>
+                </form>
+                <form action={hapusDriver}>
+                  <input type="hidden" name="driver_id" value={drv.id} />
+                  <button type="submit" className="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded font-semibold">
+                    Hapus
+                  </button>
+                </form>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
           <form action={tambahPengambilanLangsung} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2.5">
             <h3 className="font-bold text-sm text-emerald-800 border-b pb-1.5">Pengambilan Langsung (Lunas)</h3>
@@ -521,7 +558,12 @@ export default function OwnerDashboard({
             <h3 className="font-bold text-sm text-teal-800 border-b pb-1.5">Pengantaran Driver</h3>
             <div className="grid grid-cols-2 gap-2">
               <input type="date" name="event_date" defaultValue={today} required className="border rounded p-1.5" />
-              <input type="text" name="driver_name" required placeholder="Nama Driver (Wajib)" className="border rounded p-1.5" />
+              <select name="driver_name" required className="border rounded p-1.5 bg-white">
+                  <option value="">-- Pilih Driver --</option>
+                  {data.drivers.filter((d: { is_active: boolean }) => d.is_active).map((d: { id: string; name: string }) => (
+                    <option key={d.id} value={d.name}>{d.name}</option>
+                  ))}
+                </select>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
               {(['5kg', '10kg', '20kg'] as const).map((sz) => (
@@ -655,6 +697,40 @@ export default function OwnerDashboard({
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+                <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 text-xs">
+          <div className="border-b pb-2">
+            <h2 className="text-base font-bold text-slate-900">Manajemen Karyawan Driver (Dropdown Pengantaran)</h2>
+            <p className="text-slate-500">Tambah driver baru, ubah nama driver, atau hapus driver yang sudah keluar. Riwayat pengantaran lama tetap aman tersimpan.</p>
+          </div>
+
+          <form action={tambahDriver} className="flex flex-col sm:flex-row gap-2 max-w-md">
+            <input type="text" name="driver_name" required placeholder="Nama driver baru..." className="flex-1 border rounded-lg px-3 py-2" />
+            <button type="submit" className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded-lg">
+              + Tambah Driver
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {data.drivers.map((drv: { id: string; name: string }) => (
+              <div key={drv.id} className="border rounded-lg p-3 bg-slate-50 flex items-center justify-between gap-2">
+                <form action={ubahDriver} className="flex items-center gap-1.5 flex-1">
+                  <input type="hidden" name="driver_id" value={drv.id} />
+                  <input type="text" name="new_name" defaultValue={drv.name} required className="w-full border bg-white rounded px-2 py-1 text-xs font-semibold" />
+                  <button type="submit" className="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded font-semibold">
+                    Simpan
+                  </button>
+                </form>
+                <form action={hapusDriver}>
+                  <input type="hidden" name="driver_id" value={drv.id} />
+                  <button type="submit" className="bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1 rounded font-semibold">
+                    Hapus
+                  </button>
+                </form>
+              </div>
+            ))}
           </div>
         </section>
 

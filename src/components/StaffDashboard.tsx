@@ -30,6 +30,7 @@ interface StaffData {
     stok_teoretis: number;
   }>;
   customers: Array<{ id: string; name: string; phone: string | null }>;
+  drivers: Array<{ id: string; name: string }>;
   searchedReceivables: Array<{
     id: string;
     event_date: string;
@@ -323,7 +324,14 @@ export default function StaffDashboard({
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1">Nama Driver (Wajib)</label>
-                <input type="text" name="driver_name" required placeholder="Nama driver pengantar" className="w-full border rounded-lg p-2 text-sm" />
+                <select name="driver_name" required className="w-full border rounded-lg p-2 text-sm bg-white">
+                  <option value="">-- Pilih Nama Driver --</option>
+                  {data.drivers.map((drv) => (
+                    <option key={drv.id} value={drv.name}>
+                      {drv.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2">
