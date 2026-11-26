@@ -9,6 +9,7 @@ import {
   tambahProduksiBatch,
 } from '@/app/actions';
 import { UserSession } from '@/lib/auth';
+import CurrencyInput from '@/components/CurrencyInput';
 import { useState } from 'react';
 
 interface StaffData {
@@ -450,15 +451,13 @@ export default function StaffDashboard({
                     <form action={bayarPiutangBertahap} className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
                       <input type="hidden" name="receivable_id" value={r.id} />
                       <input type="date" name="payment_date" defaultValue={today} required className="border bg-white rounded px-2 py-1 text-xs" />
-                      <input
-                        type="number"
-                        name="amount"
+                      <CurrencyInput name="amount"
                         min="1"
                         max={r.remaining_balance}
                         defaultValue={r.remaining_balance}
                         required
                         className="border bg-white rounded px-2 py-1 text-xs"
-                      />
+                       />
                       <select name="method" className="border bg-white rounded px-2 py-1 text-xs">
                         <option value="cash">Tunai</option>
                         <option value="transfer">Transfer</option>
@@ -508,7 +507,7 @@ export default function StaffDashboard({
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1">Nominal (Rp)</label>
-                <input type="number" name="amount" min="1" required className="w-full border rounded-lg p-2 text-sm" />
+                <CurrencyInput name="amount" min="1" required className="w-full border rounded-lg p-2 text-sm"  />
               </div>
             </div>
             <div>
@@ -635,15 +634,13 @@ export default function StaffDashboard({
                               required
                               className="border bg-slate-50 rounded px-2 py-1 text-xs"
                             />
-                            <input
-                              type="number"
-                              name="amount"
+                            <CurrencyInput name="amount"
                               min="1"
                               max={log.remaining_balance}
                               defaultValue={log.remaining_balance}
                               required
                               className="border bg-slate-50 rounded px-2 py-1 text-xs"
-                            />
+                             />
                             <select name="method" className="border bg-slate-50 rounded px-2 py-1 text-xs">
                               <option value="cash">Tunai</option>
                               <option value="transfer">Transfer</option>

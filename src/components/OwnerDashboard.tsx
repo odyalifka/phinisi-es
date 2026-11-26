@@ -21,6 +21,7 @@ import {
 } from '@/app/actions';
 import { UserSession } from '@/lib/auth';
 import { PeriodMode } from '@/lib/queries/owner';
+import CurrencyInput from '@/components/CurrencyInput';
 import { useState } from 'react';
 import CopyReportButton from './CopyReportButton';
 
@@ -407,7 +408,7 @@ export default function OwnerDashboard({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-medium mb-1">Harga Beli per Lembar (Rp)</label>
-                  <input type="number" name="unit_price" min="0" step="0.01" required className="w-full border bg-white rounded p-1.5" />
+                  <CurrencyInput name="unit_price" min="0" step="0.01" required className="w-full border bg-white rounded p-1.5"  />
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Supplier</label>
@@ -613,7 +614,7 @@ export default function OwnerDashboard({
             </div>
             <input type="text" name="description" required placeholder="Keterangan pengeluaran" className="w-full border rounded p-1.5" />
             <div className="grid grid-cols-2 gap-2">
-              <input type="number" name="amount" min="1" required placeholder="Nominal (Rp)" className="border rounded p-1.5" />
+              <CurrencyInput name="amount" min="1" required placeholder="Nominal (Rp)" className="border rounded p-1.5"  />
               <select name="source" className="border rounded p-1.5">
                 <option value="factory_cash">Kas Pabrik</option>
                 <option value="owner_direct">Dibayar Langsung Owner</option>
@@ -650,7 +651,7 @@ export default function OwnerDashboard({
                     <form action={bayarPiutangBertahap} className="grid grid-cols-4 gap-1.5">
                       <input type="hidden" name="receivable_id" value={r.id} />
                       <input type="date" name="payment_date" defaultValue={today} required className="border rounded px-2 py-1" />
-                      <input type="number" name="amount" min="1" max={r.remaining_balance} defaultValue={r.remaining_balance} required className="border rounded px-2 py-1" />
+                      <CurrencyInput name="amount" min="1" max={r.remaining_balance} defaultValue={r.remaining_balance} required className="border rounded px-2 py-1"  />
                       <select name="method" className="border rounded px-2 py-1">
                         <option value="cash">Cash</option>
                         <option value="transfer">Transfer</option>
