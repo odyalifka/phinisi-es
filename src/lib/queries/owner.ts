@@ -195,6 +195,7 @@ export async function getOwnerDashboardData(mode: PeriodMode, refDate: string) {
     plasticPurchaseHistRes,
     iceOpnameHistRes,
     customersRes,
+    driversRes,
     allReceivablesRes,
     unpaidBonusRes,
     recentDistRes,
@@ -223,7 +224,8 @@ export async function getOwnerDashboardData(mode: PeriodMode, refDate: string) {
       FROM ice_opnames
       ORDER BY size, created_at DESC
     `),
-    pool.query(`SELECT id, name, phone FROM factory_customers ORDER BY name ASC`),
+    pool.query(SELECT id, name, phone FROM factory_customers ORDER BY name ASC),
+    pool.query(SELECT id, name, is_active FROM drivers ORDER BY name ASC),
     pool.query(`
       SELECT r.id, r.event_date::text AS event_date, c.name AS customer_name, c.phone AS customer_phone,
              d.size, d.qty, r.total_billed, r.remaining_balance, r.status
@@ -291,6 +293,7 @@ export async function getOwnerDashboardData(mode: PeriodMode, refDate: string) {
     plasticPurchases: plasticPurchaseHistRes.rows,
     latestIceOpnames: iceOpnameHistRes.rows,
     customers: customersRes.rows,
+    drivers: driversRes.rows,
     allReceivables: allReceivablesRes.rows,
     unpaidBonuses: unpaidBonusRes.rows,
     recentDistributions: recentDistRes.rows,

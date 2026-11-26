@@ -7,6 +7,7 @@ export async function getStaffDashboardData(today: string, customerQuery: string
     iceStockRes,
     plasticStockRes,
     customersRes,
+    driversRes,
     searchedReceivablesRes,
     todayProdRes,
     todayDistRes,
@@ -24,6 +25,7 @@ export async function getStaffDashboardData(today: string, customerQuery: string
       FROM v_plastic_stock_reconciliation
     `),
     pool.query(`SELECT id, name, phone FROM factory_customers ORDER BY name ASC`),
+    pool.query(`SELECT id, name FROM drivers WHERE is_active = TRUE ORDER BY name ASC`),
     cleanSearch.length >= 2
       ? pool.query(
           `SELECT r.id, r.event_date::text AS event_date, c.name AS customer_name, c.phone AS customer_phone,
@@ -77,6 +79,7 @@ export async function getStaffDashboardData(today: string, customerQuery: string
     iceStock: iceStockRes.rows,
     plasticStock: plasticStockRes.rows,
     customers: customersRes.rows,
+    drivers: driversRes.rows,
     searchedReceivables: searchedReceivablesRes.rows,
     todayProductions: todayProdRes.rows,
     todayDistributions: todayDistRes.rows,

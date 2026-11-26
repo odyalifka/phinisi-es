@@ -227,7 +227,7 @@ export async function tambahPengambilanLangsung(formData: FormData) {
     const ins = await pool.query(
       `INSERT INTO distributions (
         batch_id, event_date, dist_type, driver_name, customer_id, size, qty, payment_method,
-        unit_price_snapshot, owner_share_snapshot, driver_bonus_snapshot, notes, created_by
+        unit_price_snapshot, owner_share_snapshot, driver_bonus_snapshot, bonus_status, bonus_paid_date, notes, created_by
       ) VALUES ($1, $2, 'pickup'::distribution_type, NULL, NULL, $3::product_size, $4, $5::payment_method, $6, $7, 0, $8, $9)
       RETURNING id, total_amount`,
       [
@@ -324,8 +324,8 @@ export async function tambahPengantaran(formData: FormData) {
     const distRes = await pool.query(
       `INSERT INTO distributions (
         batch_id, event_date, dist_type, driver_name, customer_id, size, qty, payment_method,
-        unit_price_snapshot, owner_share_snapshot, driver_bonus_snapshot, notes, created_by
-      ) VALUES ($1, $2, 'delivery'::distribution_type, $3, $4, $5::product_size, $6, $7::payment_method, $8, $9, $10, $11, $12)
+        unit_price_snapshot, owner_share_snapshot, driver_bonus_snapshot, bonus_status, bonus_paid_date, notes, created_by
+      ) VALUES ($1, $2, 'delivery'::distribution_type, $3, $4, $5::product_size, $6, $7::payment_method, $8, $9, $10, 'paid'::bonus_status, $2::date, $11, $12)
       RETURNING id, total_amount`,
       [
         batchId,
