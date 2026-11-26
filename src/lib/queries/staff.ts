@@ -16,6 +16,7 @@ export async function getStaffDashboardData(today: string, customerQuery: string
     todayExpRes,
     todayPayRes,
     lastOpnameRes,
+    todayCashRes,
   ] = await Promise.all([
     pool.query(`
       SELECT size, stok_awal_atau_opname, produksi_layak_jual, produk_jadi_rusak,
@@ -115,7 +116,43 @@ export async function getStaffDashboardData(today: string, customerQuery: string
       [today]
     ),
     pool.query(`SELECT MAX(opname_date)::text AS last_opname_date FROM ice_opnames`),
+    pool.query(
+      `WITH dist_today AS (
+         SELECT
+           COALESCE(SUM(CASE WHEN payment_method::text = 'cash' THEN total_amount ELSE 0 END), 0) AS cash_sales,
+           COALESCE(SUM(CASE WHEN payment_method::text = 'transfer' THEN total_amount ELSE 0 END), 0) AS transfer_sales,
+           COALESCE(SUM(CASE WHEN dist_type::text = 'delivery' THEN total_driver_bonus ELSE 0 END), 0) AS driver_bonus_cash_taken
+         FROM distributions
+         WHERE event_date = $1::date AND is_voided = FALSE
+       ),
+       rec_today AS (
+         SELECT
+           COALESCE(SUM(CASE WHEN rp.method::text = 'cash' THEN rp.amount ELSE 0 END), 0) AS cash_receivable_paid,
+           COALESCE(SUM(CASE WHEN rp.method::text = 'transfer' THEN rp.amount ELSE 0 END), 0) AS transfer_receivable_paid
+         FROM receivable_payments rp
+         JOIN receivables r ON r.id = rp.receivable_id
+         WHERE rp.payment_date = $1::date AND r.status::text <> 'voided'
+       ),
+       exp_today AS (
+         SELECT COALESCE(SUM(amount), 0) AS cash_expenses
+         FROM expenses
+         WHERE expense_date = $1::date AND is_voided = FALSE AND source = 'factory_cash'
+       )
+       SELECT
+         (d.cash_sales + r.cash_receivable_paid) AS cash_in_total,
+         d.cash_sales,
+         r.cash_receivable_paid,
+         e.cash_expenses,
+         d.driver_bonus_cash_taken,
+         (e.cash_expenses + d.driver_bonus_cash_taken) AS cash_out_total,
+         ((d.cash_sales + r.cash_receivable_paid) - (e.cash_expenses + d.driver_bonus_cash_taken)) AS cash_to_hold_or_handover,
+         (d.transfer_sales + r.transfer_receivable_paid) AS transfer_in_total
+       FROM dist_today d, rec_today r, exp_today e`,
+      [today]
+    ),
   ]);
+
+  const rawCash = todayCashRes.rows[0] || {};
 
   return {
     iceStock: iceStockRes.rows,
@@ -130,5 +167,15 @@ export async function getStaffDashboardData(today: string, customerQuery: string
     todayExpenses: todayExpRes.rows,
     todayPayments: todayPayRes.rows,
     lastOpnameDate: lastOpnameRes.rows[0]?.last_opname_date || null,
+    cashSummary: {
+      cash_in_total: Number(rawCash.cash_in_total || 0),
+      cash_sales: Number(rawCash.cash_sales || 0),
+      cash_receivable_paid: Number(rawCash.cash_receivable_paid || 0),
+      cash_expenses: Number(rawCash.cash_expenses || 0),
+      driver_bonus_cash_taken: Number(rawCash.driver_bonus_cash_taken || 0),
+      cash_out_total: Number(rawCash.cash_out_total || 0),
+      cash_to_hold_or_handover: Number(rawCash.cash_to_hold_or_handover || 0),
+      transfer_in_total: Number(rawCash.transfer_in_total || 0),
+    },
   };
 }
