@@ -9,6 +9,8 @@ export async function getStaffDashboardData(today: string, customerQuery: string
     customersRes,
     driversRes,
     searchedReceivablesRes,
+    debtorSummaryRes,
+    debtorLogsRes,
     todayProdRes,
     todayDistRes,
     todayExpRes,
@@ -34,12 +36,52 @@ export async function getStaffDashboardData(today: string, customerQuery: string
            JOIN factory_customers c ON c.id = r.customer_id
            JOIN distributions d ON d.id = r.distribution_id
            WHERE r.status::text IN ('unpaid', 'partial')
+             AND r.remaining_balance > 0
              AND (c.name ILIKE $1 OR COALESCE(c.phone, '') ILIKE $1)
            ORDER BY r.event_date ASC
            LIMIT 15`,
           [`%${cleanSearch}%`]
         )
       : Promise.resolve({ rows: [] }),
+    pool.query(`
+      SELECT
+        c.id AS customer_id,
+        c.name AS customer_name,
+        c.phone AS customer_phone,
+        COALESCE(SUM(r.remaining_balance), 0) AS total_remaining_balance,
+        COALESCE(SUM(CASE WHEN d.size::text = '5kg' THEN d.qty ELSE 0 END), 0) AS qty_5kg,
+        COALESCE(SUM(CASE WHEN d.size::text = '10kg' THEN d.qty ELSE 0 END), 0) AS qty_10kg,
+        COALESCE(SUM(CASE WHEN d.size::text = '20kg' THEN d.qty ELSE 0 END), 0) AS qty_20kg,
+        COUNT(r.id) AS active_bills_count
+      FROM receivables r
+      JOIN factory_customers c ON c.id = r.customer_id
+      JOIN distributions d ON d.id = r.distribution_id
+      WHERE r.status::text IN ('unpaid', 'partial')
+        AND r.remaining_balance > 0
+        AND d.is_voided = FALSE
+      GROUP BY c.id, c.name, c.phone
+      HAVING COALESCE(SUM(r.remaining_balance), 0) > 0
+      ORDER BY total_remaining_balance DESC, c.name ASC
+    `),
+    pool.query(`
+      SELECT
+        r.id AS receivable_id,
+        r.customer_id,
+        r.event_date::text AS event_date,
+        d.size::text AS size,
+        d.qty,
+        r.total_billed,
+        r.remaining_balance,
+        (r.total_billed - r.remaining_balance) AS paid_amount,
+        r.status::text AS status,
+        d.driver_name
+      FROM receivables r
+      JOIN distributions d ON d.id = r.distribution_id
+      WHERE r.status::text IN ('unpaid', 'partial')
+        AND r.remaining_balance > 0
+        AND d.is_voided = FALSE
+      ORDER BY r.event_date DESC, r.created_at DESC
+    `),
     pool.query(
       `SELECT id, event_date::text AS event_date, size, gross_qty, damaged_product_qty, good_qty, damaged_plastic_qty, notes, is_voided
        FROM productions
@@ -81,6 +123,8 @@ export async function getStaffDashboardData(today: string, customerQuery: string
     customers: customersRes.rows,
     drivers: driversRes.rows,
     searchedReceivables: searchedReceivablesRes.rows,
+    debtorSummary: debtorSummaryRes.rows,
+    debtorLogs: debtorLogsRes.rows,
     todayProductions: todayProdRes.rows,
     todayDistributions: todayDistRes.rows,
     todayExpenses: todayExpRes.rows,

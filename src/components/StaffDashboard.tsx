@@ -42,6 +42,28 @@ interface StaffData {
     remaining_balance: number;
     status: string;
   }>;
+  debtorSummary: Array<{
+    customer_id: string;
+    customer_name: string;
+    customer_phone: string | null;
+    total_remaining_balance: number;
+    qty_5kg: number;
+    qty_10kg: number;
+    qty_20kg: number;
+    active_bills_count: number;
+  }>;
+  debtorLogs: Array<{
+    receivable_id: string;
+    customer_id: string;
+    event_date: string;
+    size: string;
+    qty: number;
+    total_billed: number;
+    remaining_balance: number;
+    paid_amount: number;
+    status: string;
+    driver_name: string | null;
+  }>;
   todayProductions: Array<{
     id: string;
     event_date: string;
@@ -90,6 +112,14 @@ function formatRp(n: number | string) {
   return `Rp ${Math.round(Number(n || 0)).toLocaleString('id-ID')}`;
 }
 
+function formatPackSummary(q5: number, q10: number, q20: number) {
+  const parts: string[] = [];
+  if (Number(q5) > 0) parts.push(`${Number(q5)} bks (5kg)`);
+  if (Number(q10) > 0) parts.push(`${Number(q10)} bks (10kg)`);
+  if (Number(q20) > 0) parts.push(`${Number(q20)} bks (20kg)`);
+  return parts.length > 0 ? parts.join(' · ') : '0 bks';
+}
+
 export default function StaffDashboard({
   session,
   today,
@@ -107,8 +137,15 @@ export default function StaffDashboard({
 }) {
   const [expCategory, setExpCategory] = useState('bbm');
   const [prodGross, setProdGross] = useState<Record<string, number>>({ '5kg': 0, '10kg': 0, '20kg': 0 });
+  const [selectedDebtorId, setSelectedDebtorId] = useState<string | null>(
+    data.debtorSummary[0]?.customer_id || null
+  );
 
   const isReceiptRequired = MANDATORY_CATS.has(expCategory);
+  const activeDebtor = data.debtorSummary.find((d) => d.customer_id === selectedDebtorId) || null;
+  const activeDebtorLogs = selectedDebtorId
+    ? data.debtorLogs.filter((log) => log.customer_id === selectedDebtorId)
+    : [];
 
   return (
     <main className="min-h-screen bg-slate-50 p-4 md:p-8 text-slate-800">
@@ -495,6 +532,137 @@ export default function StaffDashboard({
               Simpan Pengeluaran Staff
             </button>
           </form>
+        </section>
+
+        <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b pb-3">
+            <div>
+              <h3 className="font-bold text-base text-amber-950">3B. Daftar Pelanggan Berutang & Riwayat Nota Aktif</h3>
+              <p className="text-xs text-slate-500">
+                Menampilkan otomatis seluruh pelanggan yang masih berutang beserta rincian bungkus per kemasan dan sisa tagihan. Klik nama pelanggan untuk melihat riwayat hari pembelian & pelunasannya. Nota yang sudah lunas otomatis hilang dari daftar aktif ini.
+              </p>
+            </div>
+            <span className="text-xs font-semibold bg-amber-100 text-amber-900 px-3 py-1 rounded-full">
+              {data.debtorSummary.length} Pelanggan Aktif Berutang
+            </span>
+          </div>
+
+          {data.debtorSummary.length === 0 ? (
+            <p className="text-xs text-slate-500">Tidak ada pelanggan dengan sisa utang aktif saat ini.</p>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs">
+              <div className="lg:col-span-6 space-y-2">
+                {data.debtorSummary.map((deb) => {
+                  const isSelected = deb.customer_id === selectedDebtorId;
+                  return (
+                    <button
+                      key={deb.customer_id}
+                      type="button"
+                      onClick={() => setSelectedDebtorId(deb.customer_id)}
+                      className={`w-full text-left p-3.5 rounded-xl border transition ${
+                        isSelected
+                          ? 'bg-amber-50 border-amber-500 ring-1 ring-amber-500'
+                          : 'bg-slate-50/70 border-slate-200 hover:bg-amber-50/40'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <span className="font-bold text-sm text-slate-900">{deb.customer_name}</span>
+                          {deb.customer_phone && (
+                            <span className="ml-2 text-[11px] text-slate-500">({deb.customer_phone})</span>
+                          )}
+                        </div>
+                        <span className="font-bold text-sm text-rose-700">
+                          {formatRp(deb.total_remaining_balance)}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
+                        <span>
+                          Kemasan aktif: <strong>{formatPackSummary(deb.qty_5kg, deb.qty_10kg, deb.qty_20kg)}</strong>
+                        </span>
+                        <span className="underline text-amber-900 font-medium">
+                          {isSelected ? 'Riwayat dibuka' : 'Klik lihat riwayat'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="lg:col-span-6 border rounded-xl p-4 bg-slate-50/60 space-y-3">
+                {!activeDebtor ? (
+                  <p className="text-slate-500">Klik salah satu pelanggan di sebelah kiri untuk melihat riwayat pembelian utang dan pelunasannya.</p>
+                ) : (
+                  <>
+                    <div className="border-b pb-2.5 flex items-center justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-900">
+                          Log Riwayat Utang — {activeDebtor.customer_name}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          Total kemasan: {formatPackSummary(activeDebtor.qty_5kg, activeDebtor.qty_10kg, activeDebtor.qty_20kg)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="block text-[10px] uppercase text-slate-500">Sisa Terutang</span>
+                        <span className="font-bold text-sm text-rose-700">
+                          {formatRp(activeDebtor.total_remaining_balance)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+                      {activeDebtorLogs.map((log) => (
+                        <div key={log.receivable_id} className="bg-white border rounded-lg p-3 space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-1">
+                            <span className="font-bold text-slate-900">
+                              Tanggal: {log.event_date} · {log.qty} bks ({log.size})
+                            </span>
+                            <span className="font-bold text-rose-700">
+                              Sisa: {formatRp(log.remaining_balance)}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600">
+                            Tagihan awal: {formatRp(log.total_billed)} · Sudah dilunasi: <strong>{formatRp(log.paid_amount)}</strong>
+                            {log.driver_name ? ` · Driver: ${log.driver_name}` : ''}
+                          </p>
+                          <form action={bayarPiutangBertahap} className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                            <input type="hidden" name="receivable_id" value={log.receivable_id} />
+                            <input
+                              type="date"
+                              name="payment_date"
+                              defaultValue={today}
+                              required
+                              className="border bg-slate-50 rounded px-2 py-1 text-xs"
+                            />
+                            <input
+                              type="number"
+                              name="amount"
+                              min="1"
+                              max={log.remaining_balance}
+                              defaultValue={log.remaining_balance}
+                              required
+                              className="border bg-slate-50 rounded px-2 py-1 text-xs"
+                            />
+                            <select name="method" className="border bg-slate-50 rounded px-2 py-1 text-xs">
+                              <option value="cash">Tunai</option>
+                              <option value="transfer">Transfer</option>
+                            </select>
+                            <button
+                              type="submit"
+                              className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold rounded px-2 py-1 text-xs"
+                            >
+                              Bayar Nota
+                            </button>
+                          </form>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
