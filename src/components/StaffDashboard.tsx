@@ -8,8 +8,8 @@ import {
   tambahPengeluaran,
   tambahProduksiBatch,
 } from '@/app/actions';
-import { UserSession } from '@/lib/auth';
 import CurrencyInput from '@/components/CurrencyInput';
+import { UserSession } from '@/lib/auth';
 import { useState } from 'react';
 
 interface StaffData {
@@ -189,7 +189,7 @@ export default function StaffDashboard({
           </div>
         )}
 
-                <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b pb-3">
             <div>
               <h2 className="text-base font-bold text-slate-900">Ringkasan Kas & Setoran Tunai Hari Ini ({today})</h2>
@@ -372,54 +372,6 @@ export default function StaffDashboard({
           </div>
         </form>
 
-                <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b pb-3">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Ringkasan Kas & Setoran Tunai Hari Ini ({today})</h2>
-              <p className="text-xs text-slate-500">
-                Uang tunai yang seharusnya ada di pegangan / disetorkan = Penerimaan Tunai - (Pengeluaran Kas Pabrik + Bonus Driver yang Diambil Tunai Hari Ini).
-              </p>
-            </div>
-            <span className="text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200 px-3 py-1 rounded-full">
-              Bonus Driver Diambil Tunai di Laci
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200">
-              <span className="block text-[11px] font-semibold text-emerald-900 uppercase">Penerimaan Tunai (+)</span>
-              <span className="block text-lg font-bold text-emerald-800 mt-1">{formatRp(data.cashSummary.cash_in_total)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Penjualan: {formatRp(data.cashSummary.cash_sales)} · Piutang: {formatRp(data.cashSummary.cash_receivable_paid)}
-              </span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200">
-              <span className="block text-[11px] font-semibold text-rose-900 uppercase">Pengeluaran & Bonus Tunai (-)</span>
-              <span className="block text-lg font-bold text-rose-800 mt-1">{formatRp(data.cashSummary.cash_out_total)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Biaya: {formatRp(data.cashSummary.cash_expenses)} · Bonus: {formatRp(data.cashSummary.driver_bonus_cash_taken)}
-              </span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-300">
-              <span className="block text-[11px] font-semibold text-blue-950 uppercase">Tunai Harus Dipegang / Disetor</span>
-              <span className="block text-lg font-bold text-blue-900 mt-1">{formatRp(data.cashSummary.cash_to_hold_or_handover)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Uang fisik bersih hari ini (di luar transfer)
-              </span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-100/80 border border-slate-300">
-              <span className="block text-[11px] font-semibold text-slate-800 uppercase">Masuk via Transfer (Rekening)</span>
-              <span className="block text-lg font-bold text-slate-900 mt-1">{formatRp(data.cashSummary.transfer_in_total)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Tidak menambah uang fisik di laci kas
-              </span>
-            </div>
-          </div>
-        </section>
-
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <form action={tambahPengambilanLangsung} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
             <div className="border-b pb-2">
@@ -517,54 +469,6 @@ export default function StaffDashboard({
           </form>
         </section>
 
-                <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b pb-3">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Ringkasan Kas & Setoran Tunai Hari Ini ({today})</h2>
-              <p className="text-xs text-slate-500">
-                Uang tunai yang seharusnya ada di pegangan / disetorkan = Penerimaan Tunai - (Pengeluaran Kas Pabrik + Bonus Driver yang Diambil Tunai Hari Ini).
-              </p>
-            </div>
-            <span className="text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200 px-3 py-1 rounded-full">
-              Bonus Driver Diambil Tunai di Laci
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200">
-              <span className="block text-[11px] font-semibold text-emerald-900 uppercase">Penerimaan Tunai (+)</span>
-              <span className="block text-lg font-bold text-emerald-800 mt-1">{formatRp(data.cashSummary.cash_in_total)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Penjualan: {formatRp(data.cashSummary.cash_sales)} · Piutang: {formatRp(data.cashSummary.cash_receivable_paid)}
-              </span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200">
-              <span className="block text-[11px] font-semibold text-rose-900 uppercase">Pengeluaran & Bonus Tunai (-)</span>
-              <span className="block text-lg font-bold text-rose-800 mt-1">{formatRp(data.cashSummary.cash_out_total)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Biaya: {formatRp(data.cashSummary.cash_expenses)} · Bonus: {formatRp(data.cashSummary.driver_bonus_cash_taken)}
-              </span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-300">
-              <span className="block text-[11px] font-semibold text-blue-950 uppercase">Tunai Harus Dipegang / Disetor</span>
-              <span className="block text-lg font-bold text-blue-900 mt-1">{formatRp(data.cashSummary.cash_to_hold_or_handover)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Uang fisik bersih hari ini (di luar transfer)
-              </span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-100/80 border border-slate-300">
-              <span className="block text-[11px] font-semibold text-slate-800 uppercase">Masuk via Transfer (Rekening)</span>
-              <span className="block text-lg font-bold text-slate-900 mt-1">{formatRp(data.cashSummary.transfer_in_total)}</span>
-              <span className="block text-[11px] text-slate-600 mt-1">
-                Tidak menambah uang fisik di laci kas
-              </span>
-            </div>
-          </div>
-        </section>
-
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
             <div className="border-b pb-2">
@@ -605,13 +509,14 @@ export default function StaffDashboard({
                     <form action={bayarPiutangBertahap} className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
                       <input type="hidden" name="receivable_id" value={r.id} />
                       <input type="date" name="payment_date" defaultValue={today} required className="border bg-white rounded px-2 py-1 text-xs" />
-                      <CurrencyInput name="amount"
-                        min="1"
+                      <CurrencyInput
+                        name="amount"
+                        min={1}
                         max={r.remaining_balance}
                         defaultValue={r.remaining_balance}
                         required
                         className="border bg-white rounded px-2 py-1 text-xs"
-                       />
+                      />
                       <select name="method" className="border bg-white rounded px-2 py-1 text-xs">
                         <option value="cash">Tunai</option>
                         <option value="transfer">Transfer</option>
@@ -661,7 +566,7 @@ export default function StaffDashboard({
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1">Nominal (Rp)</label>
-                <CurrencyInput name="amount" min="1" required className="w-full border rounded-lg p-2 text-sm"  />
+                <CurrencyInput name="amount" min={1} required className="w-full border rounded-lg p-2 text-sm" />
               </div>
             </div>
             <div>
@@ -788,13 +693,14 @@ export default function StaffDashboard({
                               required
                               className="border bg-slate-50 rounded px-2 py-1 text-xs"
                             />
-                            <CurrencyInput name="amount"
-                              min="1"
+                            <CurrencyInput
+                              name="amount"
+                              min={1}
                               max={log.remaining_balance}
                               defaultValue={log.remaining_balance}
                               required
                               className="border bg-slate-50 rounded px-2 py-1 text-xs"
-                             />
+                            />
                             <select name="method" className="border bg-slate-50 rounded px-2 py-1 text-xs">
                               <option value="cash">Tunai</option>
                               <option value="transfer">Transfer</option>
