@@ -148,7 +148,7 @@ export async function tambahProduksiBatch(formData: FormData) {
 
   redirectWith('success', `Produksi (${entries.length} ukuran) pada ${event_date} berhasil disimpan.`);
 }
-$1(formData: FormData) {
+export async function voidProduksi(formData: FormData) {
   const session = await getSession();
   if (!session || session.role !== 'owner') {
     redirectWith('error', 'Hanya Owner yang berhak membatalkan (Void) data produksi.');
