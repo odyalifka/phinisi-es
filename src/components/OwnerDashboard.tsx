@@ -408,7 +408,7 @@ export default function OwnerDashboard({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-medium mb-1">Harga Beli per Lembar (Rp)</label>
-                  <CurrencyInput name="unit_price" min="0" step="0.01" required className="w-full border bg-white rounded p-1.5"  />
+                  <CurrencyInput name="unit_price" min="0" required className="w-full border bg-white rounded p-1.5"  />
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Supplier</label>

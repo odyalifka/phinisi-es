@@ -35,6 +35,7 @@ export default function CurrencyInput({
   className?: string;
   min?: number | string;
   max?: number | string;
+  step?: number | string;
 }) {
   const [digits, setDigits] = useState<string>(() => onlyDigits(defaultValue));
 
