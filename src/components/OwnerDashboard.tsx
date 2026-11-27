@@ -231,64 +231,41 @@ export default function OwnerDashboard({
           </div>
         </section>
 
-        <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 text-xs">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b pb-3">
             <div>
-              <h2 className="text-lg font-bold text-blue-950">Kontrol Stok Es & Stock Opname Cold Storage (Wajib Akhir Minggu)</h2>
-              <p className="text-xs text-slate-500">
-                Opname Terakhir: <strong>{latestOpnameDateStr || 'Belum pernah dilakukan'}</strong>
+              <h2 className="text-base font-bold text-blue-950">Stok Opname Cold Storage (Sisa Fisik Hari Opname)</h2>
+              <p className="text-slate-500">
+                Catat sisa fisik bungkus es di cold storage pada hari Anda mengecek/opname. Bandingkan dengan sisa lembar plastik untuk melihat pergerakan bungkus sebelum dicocokkan dengan kas & piutang.
               </p>
             </div>
-            {daysSinceOpname >= 7 ? (
-              <span className="text-xs bg-rose-100 text-rose-800 font-bold px-3 py-1.5 rounded-full w-fit">
-                Peringatan: Jadwal Stock Opname Akhir Minggu Sudah Jatuh Tempo!
-              </span>
-            ) : (
-              <span className="text-xs bg-emerald-100 text-emerald-800 font-semibold px-3 py-1.5 rounded-full w-fit">
-                Status Opname Mingguan Terkendali ({daysSinceOpname} hari lalu)
-              </span>
-            )}
+            <span className="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+              Opname Terakhir: {data.lastOpnameDate || 'Belum pernah dilakukan'}
+            </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
+            <table className="w-full text-left">
               <thead className="bg-slate-100 text-slate-600 uppercase">
                 <tr>
                   <th className="p-2.5">Ukuran</th>
-                  <th className="p-2.5">Stok Awal / Opname</th>
-                  <th className="p-2.5">Produksi Layak</th>
-                  <th className="p-2.5">Produk Rusak</th>
-                  <th className="p-2.5">Ambil</th>
-                  <th className="p-2.5">Antar</th>
-                  <th className="p-2.5 font-bold text-blue-900">Stok Teoretis</th>
-                  <th className="p-2.5">Stok Aktual Opname Terakhir</th>
-                  <th className="p-2.5">Selisih Opname Terakhir</th>
+                  <th className="p-2.5">Sisa Fisik Cold Storage (Opname Terakhir)</th>
+                  <th className="p-2.5">Sisa Plastik Tersedia</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {data.iceStock.map((row: {
-                  size: string;
-                  stok_awal_atau_opname: number;
-                  produksi_layak_jual: number;
-                  produk_jadi_rusak: number;
-                  ambil_langsung: number;
-                  diantar_driver: number;
-                  stok_teoretis_sekarang: number;
-                }) => {
-                  const lastOp = latestIceOpnameMap.get(row.size);
-                  const selisihOp = lastOp ? Number(lastOp.actual_qty) - Number(lastOp.theoretical_qty) : 0;
+                {data.iceStock.map((row: { size: string; stok_awal_atau_opname: number }) => {
+                  const plastikRow = data.plasticStock.find(
+                    (p: { size: string; stok_teoretis: number }) => p.size === row.size
+                  );
                   return (
                     <tr key={row.size}>
-                      <td className="p-2.5 font-bold">{row.size}</td>
-                      <td className="p-2.5">{row.stok_awal_atau_opname}</td>
-                      <td className="p-2.5 text-emerald-700 font-medium">+{row.produksi_layak_jual}</td>
-                      <td className="p-2.5 text-rose-600">{row.produk_jadi_rusak}</td>
-                      <td className="p-2.5">{row.ambil_langsung}</td>
-                      <td className="p-2.5">{row.diantar_driver}</td>
-                      <td className="p-2.5 font-bold text-blue-900 text-sm">{row.stok_teoretis_sekarang} bks</td>
-                      <td className="p-2.5">{lastOp ? `${lastOp.actual_qty} bks (${lastOp.opname_date})` : '-'}</td>
-                      <td className={`p-2.5 font-bold ${selisihOp !== 0 ? 'text-rose-600' : 'text-slate-600'}`}>
-                        {lastOp ? `${selisihOp > 0 ? '+' : ''}${selisihOp} bks` : '-'}
+                      <td className="p-2.5 font-bold text-sm">{row.size}</td>
+                      <td className="p-2.5 font-bold text-blue-900 text-sm">
+                        {row.stok_awal_atau_opname} bks
+                      </td>
+                      <td className="p-2.5 font-semibold text-indigo-900">
+                        {plastikRow ? `${plastikRow.stok_teoretis} lbr` : '-'}
                       </td>
                     </tr>
                   );
@@ -297,29 +274,62 @@ export default function OwnerDashboard({
             </table>
           </div>
 
-          <form action={simpanOpnameColdStorage} className="bg-indigo-50/60 border border-indigo-200 rounded-xl p-4 space-y-3">
-            <h3 className="font-bold text-sm text-indigo-950">Input Stock Opname Cold Storage (Ketiga Ukuran)</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+          <form action={simpanOpnameColdStorage} className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 space-y-3">
+            <h3 className="font-bold text-sm text-blue-950">Catat Sisa Fisik Cold Storage Hari Opname</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="block font-medium mb-1">Tanggal Opname</label>
-                <input type="date" name="opname_date" defaultValue={today} required className="w-full border bg-white rounded-lg p-2" />
+                <input
+                  type="date"
+                  name="opname_date"
+                  defaultValue={selectedDate}
+                  required
+                  className="w-full border bg-white rounded-lg p-2"
+                />
               </div>
-              {(['5kg', '10kg', '20kg'] as const).map((sz) => (
-                <div key={sz}>
-                  <label className="block font-medium mb-1">Stok Fisik Aktual {sz} (Bks)</label>
-                  <input type="number" name={`actual_${sz}`} min="0" placeholder="Kosongkan jika tdk diopname" className="w-full border bg-white rounded-lg p-2" />
-                </div>
-              ))}
+              <div>
+                <label className="block font-medium mb-1">Sisa Cold Storage 5kg (Bks)</label>
+                <input
+                  type="number"
+                  name="actual_5kg"
+                  min="0"
+                  placeholder="Contoh: 10 atau 0"
+                  className="w-full border bg-white rounded-lg p-2"
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Sisa Cold Storage 10kg (Bks)</label>
+                <input
+                  type="number"
+                  name="actual_10kg"
+                  min="0"
+                  placeholder="Contoh: 10 atau 0"
+                  className="w-full border bg-white rounded-lg p-2"
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Sisa Cold Storage 20kg (Bks)</label>
+                <input
+                  type="number"
+                  name="actual_20kg"
+                  min="0"
+                  placeholder="Contoh: 10 atau 0"
+                  className="w-full border bg-white rounded-lg p-2"
+                />
+              </div>
             </div>
             <div className="flex flex-col md:flex-row gap-2">
               <input
                 type="text"
                 name="notes"
-                placeholder="Keterangan selisih (WAJIB diisi jika stok aktual berbeda dari stok teoretis)"
-                className="flex-1 border bg-white rounded-lg p-2 text-xs"
+                placeholder="Catatan opname (opsional, misal: Cek akhir pekan sebelum pulang / minggu depan)"
+                className="flex-1 border bg-white rounded-lg p-2"
               />
-              <button type="submit" className="bg-indigo-900 hover:bg-indigo-800 text-white font-semibold px-5 py-2 rounded-lg text-xs">
-                Simpan Stock Opname Cold Storage
+              <button
+                type="submit"
+                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg"
+              >
+                Simpan Sisa Cold Storage
               </button>
             </div>
           </form>
