@@ -282,7 +282,7 @@ export default function OwnerDashboard({
                 <input
                   type="date"
                   name="opname_date"
-                  defaultValue={selectedDate}
+                  defaultValue={today}
                   required
                   className="w-full border bg-white rounded-lg p-2"
                 />
